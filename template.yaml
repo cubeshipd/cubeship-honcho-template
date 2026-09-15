@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://cubeship.dev/schema/template/v1.json
+version: 1
+minCubeship: "0.7.0"
+project: honcho
+
+inputs:
+  - key: domain
+    type: domain
+    label: Where the Honcho API answers
+  - key: openaiApiKey
+    type: secret
+    label: Your OpenAI API key
+    help: Honcho uses OpenAI for memory extraction, reasoning and embeddings. Model usage is billed by OpenAI.
+  - key: jwtSecret
+    type: secret
+    label: The key Honcho signs access tokens with
+    help: Keep this unchanged across updates. Generate a workspace access token after installing, as described in the README.
+    generate: 48
+  - key: dbPassword
+    type: secret
+    label: The password Honcho uses for its database
+    generate: 32
+
+databases:
+  - key: redis
+    name: honcho-redis
+    engine: redis
+    version: "7.4"
+    limits: { cpu: 0.5, memory: 256Mi }
+
+apps:
+  - key: database
+    name: postgres
+    # Managed Postgres has no pgvector; Honcho installs the extension during
+    # its migrations. No domain or published TCP port: internal access only.
+    image: pgvector/pgvector
+    tag: 0.8.2-pg17-bookworm
+    port: 5432
+    volumes:
+      - path: /var/lib/postgresql/data
+    limits: { cpu: 1, memory: 1Gi }
+    env:
+      POSTGRES_USER: honcho
+      POSTGRES_PASSWORD: ${input.dbPassword}
+      POSTGRES_DB: honcho
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+  - key: api
+    name: honcho
+    repo: https://github.com/cubeshipd/cubeship-honcho-template
+    ref: v1.0.0
+    build: dockerfile
+    port: 8000
+    health: /health
+    domains:
+      - host: ${input.domain}
+    limits: { cpu: 1, memory: 2Gi }
+    env:
+      CUBESHIP_HONCHO_ROLE: api
+      DB_CONNECTION_URI: postgresql+psycopg://honcho:${input.dbPassword}@${app.database.internal}:${app.database.port}/honcho
+      DB_POOL_SIZE: "5"
+      DB_MAX_OVERFLOW: "5"
+      CACHE_ENABLED: "true"
+      CACHE_URL: redis://default:${db.redis.password}@${db.redis.host}:${db.redis.port}/0?suppress=true
+      AUTH_USE_AUTH: "true"
+      AUTH_JWT_SECRET: ${input.jwtSecret}
+      LLM_OPENAI_API_KEY: ${input.openaiApiKey}
+      VECTOR_STORE_TYPE: pgvector
+
+  - key: deriver
+    name: deriver
+    repo: https://github.com/cubeshipd/cubeship-honcho-template
+    ref: v1.0.0
+    build: dockerfile
+    # The deriver consumes the database queue; it serves no public HTTP API.
+    limits: { cpu: 1, memory: 2Gi }
+    env:
+      CUBESHIP_HONCHO_ROLE: deriver
+      CUBESHIP_HONCHO_API_URL: http://${app.api.internal}:${app.api.port}
+      DB_CONNECTION_URI: postgresql+psycopg://honcho:${input.dbPassword}@${app.database.internal}:${app.database.port}/honcho
+      DB_POOL_SIZE: "5"
+      DB_MAX_OVERFLOW: "5"
+      CACHE_ENABLED: "true"
+      CACHE_URL: redis://default:${db.redis.password}@${db.redis.host}:${db.redis.port}/0?suppress=true
+      AUTH_USE_AUTH: "true"
+      AUTH_JWT_SECRET: ${input.jwtSecret}
+      LLM_OPENAI_API_KEY: ${input.openaiApiKey}
+      VECTOR_STORE_TYPE: pgvector
+      DERIVER_WORKERS: "1"
