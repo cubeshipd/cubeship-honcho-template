@@ -168,3 +168,15 @@ that option so the generated token works with this pinned version.
 
 The icon is rendered from Honcho's
 [official favicon](https://github.com/plastic-labs/honcho/blob/v3.1.2/docs/favicon.svg).
+
+---
+
+<!-- cubeship-crosslink -->
+
+## About Cubeship
+
+This is a template for [**Cubeship**](https://github.com/cubeshipd/cubeship) —
+a PaaS you run on your own server: `docker push`, and it is live, with HTTPS,
+a database beside it, and a second machine when one stops being enough.
+
+Browse every template at [cubeship.dev/templates](https://cubeship.dev/templates).
