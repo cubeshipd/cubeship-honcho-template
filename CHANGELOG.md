@@ -11,6 +11,13 @@
 - Existing installations are not migrated. Their `postgres` app and volume stay
   where they are; moving across means a fresh install and `pg_dump`/`psql`.
 
+## [2.0.1](https://github.com/cubeshipd/cubeship-honcho-template/compare/v2.0.0...v2.0.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* cut a release when the upstream app updates ([d4e298f](https://github.com/cubeshipd/cubeship-honcho-template/commit/d4e298faf7bde8534bca127ecf15fe2e28e991f6))
+
 ## [2.0.0](https://github.com/cubeshipd/cubeship-honcho-template/compare/v1.0.0...v2.0.0) (2026-09-15)
 
 
