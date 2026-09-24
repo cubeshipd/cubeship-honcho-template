@@ -11,6 +11,13 @@
 - Existing installations are not migrated. Their `postgres` app and volume stay
   where they are; moving across means a fresh install and `pg_dump`/`psql`.
 
+## [2.0.2](https://github.com/cubeshipd/cubeship-honcho-template/compare/v2.0.1...v2.0.2) (2026-09-24)
+
+
+### Bug Fixes
+
+* update ghcr.io/plastic-labs/honcho docker tag to v3.2.1 ([#10](https://github.com/cubeshipd/cubeship-honcho-template/issues/10)) ([9bd7a0b](https://github.com/cubeshipd/cubeship-honcho-template/commit/9bd7a0bf0eca416e79855e300eb5c0e1a33813ae))
+
 ## [2.0.1](https://github.com/cubeshipd/cubeship-honcho-template/compare/v2.0.0...v2.0.1) (2026-09-17)
 
 
